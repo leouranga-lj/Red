@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARCC-Net · Red Argentina de Investigación en Cuidados Críticos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #071525;
+    --blue-dark: #0d2444;
+    --blue-mid: #1a4b8c;
+    --blue-light: #4e8fd4;
+    --sky: #7ec8e3;
+    --white: #f4f7fc;
+    --cream: #eaf0f8;
+    --accent: #c8a96e;
+    --accent-light: #e8d5a3;
+    --text: #1a2b3c;
+    --muted: #5a7a99;
+    --border: rgba(78,143,212,0.18);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(7,21,37,0.85);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em;
+    color: var(--white);
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--sky); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent); color: var(--navy);
+    padding: 0.55rem 1.4rem; border-radius: 4px;
+    font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em;
+    text-decoration: none; transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent-light); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    position: relative; overflow: hidden;
+  }
+  .hero-left {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 10rem 4rem 6rem 4rem;
+    position: relative; z-index: 2;
+  }
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.22em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 1.8rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .hero-tag::before {
+    content: ''; width: 32px; height: 1px; background: var(--accent);
+  }
+  .hero-h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 5.5rem);
+    font-weight: 900; line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.2rem;
+  }
+  .hero-h1 em {
+    font-style: italic; color: var(--sky);
+  }
+  .hero-sub {
+    font-size: 1rem; line-height: 1.75;
+    color: rgba(196,218,240,0.75);
+    max-width: 420px; margin-bottom: 3rem;
+  }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent); color: var(--navy);
+    padding: 0.85rem 2rem; border-radius: 4px;
+    font-weight: 600; font-size: 0.9rem; letter-spacing: 0.04em;
+    text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,169,110,0.35); }
+  .btn-outline {
+    border: 1px solid var(--border); color: var(--sky);
+    padding: 0.85rem 2rem; border-radius: 4px;
+    font-weight: 500; font-size: 0.9rem;
+    text-decoration: none; transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--sky); color: var(--white); }
+
+  .hero-right {
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .hero-visual {
+    position: relative; width: 420px; height: 420px;
+  }
+  .hero-ring {
+    position: absolute; border-radius: 50%;
+    border: 1px solid var(--border);
+    animation: rotate-slow linear infinite;
+  }
+  .ring-1 { width: 420px; height: 420px; top: 0; left: 0; animation-duration: 60s; }
+  .ring-2 { width: 310px; height: 310px; top: 55px; left: 55px; animation-duration: 40s; animation-direction: reverse; border-color: rgba(126,200,227,0.12); }
+  .ring-3 { width: 200px; height: 200px; top: 110px; left: 110px; animation-duration: 25s; border-color: rgba(200,169,110,0.18); }
+  @keyframes rotate-slow { to { transform: rotate(360deg); } }
+  .ring-dot {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); top: -4px; left: 50%; transform: translateX(-50%);
+  }
+  .ring-dot-blue {
+    background: var(--sky); top: -4px;
+  }
+  .hero-center-text {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .hero-center-text .big-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; font-weight: 900; color: var(--white);
+    line-height: 1;
+  }
+  .hero-center-text .big-label {
+    font-size: 0.72rem; letter-spacing: 0.18em; color: var(--muted);
+    text-transform: uppercase; margin-top: 0.3rem;
+  }
+
+  .hero-bg-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(78,143,212,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(78,143,212,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-bg-glow {
+    position: absolute; right: -100px; top: 50%; transform: translateY(-50%);
+    width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,75,140,0.35) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* ── STATS STRIP ── */
+  .stats-strip {
+    background: var(--blue-dark);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 4rem;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+  }
+  .stat-item {
+    padding: 0 2.5rem; text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem; font-weight: 900;
+    color: var(--accent); line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.78rem; letter-spacing: 0.12em;
+    color: var(--muted); text-transform: uppercase; margin-top: 0.5rem;
+  }
+
+  /* ── SECTION COMMONS ── */
+  section { padding: 7rem 4rem; }
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .section-tag::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+    margin-bottom: 1.2rem;
+  }
+  .section-desc {
+    font-size: 1rem; line-height: 1.8;
+    color: rgba(196,218,240,0.7);
+    max-width: 520px;
+  }
+
+  /* ── MISSION / VISION ── */
+  .mission-section {
+    background: var(--blue-dark);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+    align-items: center;
+  }
+  .mission-card {
+    background: rgba(7,21,37,0.6);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 3rem;
+    position: relative; overflow: hidden;
+  }
+  .mission-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--blue-light), var(--sky));
+  }
+  .mission-card.vision::before {
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  }
+  .card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.25em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  .card-text {
+    font-size: 0.92rem; line-height: 1.8;
+    color: rgba(196,218,240,0.75);
+  }
+
+  /* ── VALUES GRID ── */
+  .values-section { background: var(--navy); }
+  .values-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+    margin-top: 4rem;
+  }
+  .value-card {
+    background: var(--blue-dark);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 2rem 2rem 2.5rem;
+    transition: transform 0.25s, border-color 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .value-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(78,143,212,0.4);
+  }
+  .value-icon {
+    width: 44px; height: 44px; border-radius: 8px;
+    background: rgba(26,75,140,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; margin-bottom: 1.2rem;
+    border: 1px solid var(--border);
+  }
+  .value-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem;
+  }
+  .value-desc {
+    font-size: 0.85rem; line-height: 1.7;
+    color: rgba(196,218,240,0.65);
+  }
+
+  /* ── TIMELINE ── */
+  .timeline-section {
+    background: var(--blue-dark);
+    overflow: hidden;
+  }
+  .timeline {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; margin-top: 4rem;
+  }
+  .tl-block {
+    padding: 3rem;
+    background: rgba(7,21,37,0.5);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.25s;
+  }
+  .tl-block:hover { background: rgba(26,75,140,0.2); }
+  .tl-period {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem; font-weight: 900;
+    color: var(--accent); margin-bottom: 0.4rem;
+  }
+  .tl-label {
+    font-size: 0.72rem; letter-spacing: 0.18em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 1.5rem;
+  }
+  .tl-items { list-style: none; }
+  .tl-items li {
+    font-size: 0.88rem; line-height: 1.65;
+    color: rgba(196,218,240,0.8);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(78,143,212,0.08);
+    display: flex; gap: 0.7rem;
+  }
+  .tl-items li::before {
+    content: '→'; color: var(--sky); flex-shrink: 0; margin-top: 0.05rem;
+  }
+
+  /* ── MODELS ── */
+  .models-section { background: var(--navy); }
+  .models-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
+    margin-top: 4rem;
+  }
+  .model-card {
+    display: flex; gap: 1.8rem; align-items: flex-start;
+    background: var(--blue-dark);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 2rem 2.2rem;
+    transition: transform 0.25s, border-color 0.25s;
+  }
+  .model-card:hover { transform: translateY(-3px); border-color: rgba(126,200,227,0.3); }
+  .model-flag {
+    width: 50px; height: 50px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .model-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;
+  }
+  .model-country {
+    font-size: 0.72rem; letter-spacing: 0.12em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 0.7rem;
+  }
+  .model-desc { font-size: 0.85rem; line-height: 1.7; color: rgba(196,218,240,0.65); }
+
+  /* ── SCOPE ── */
+  .scope-section {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--navy) 60%);
+    display: grid; grid-template-columns: 1fr 1.2fr; gap: 5rem; align-items: center;
+  }
+  .scope-list { list-style: none; margin-top: 2rem; }
+  .scope-list li {
+    padding: 1rem 0; border-bottom: 1px solid var(--border);
+    font-size: 0.92rem; line-height: 1.65;
+    color: rgba(196,218,240,0.8);
+    display: flex; gap: 1rem;
+  }
+  .scope-list li::before { content: '·'; color: var(--sky); font-size: 1.5rem; line-height: 1.2; }
+  .scope-flow {
+    background: rgba(7,21,37,0.6);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 3rem;
+    text-align: center;
+  }
+  .flow-steps {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .flow-step {
+    padding: 1.5rem 2rem;
+    background: rgba(26,75,140,0.2);
+    border-radius: 8px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700;
+    transition: background 0.2s;
+    margin-bottom: 0.5rem;
+  }
+  .flow-step:hover { background: rgba(26,75,140,0.45); }
+  .flow-arrow {
+    font-size: 1.4rem; color: var(--accent); padding: 0.3rem 0;
+  }
+
+  /* ── BENEFITS ── */
+  .benefits-section { background: var(--blue-dark); }
+  .benefits-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+    margin-top: 4rem;
+  }
+  .benefit-card {
+    padding: 2rem; border-radius: 10px;
+    background: rgba(7,21,37,0.5);
+    border: 1px solid var(--border);
+    transition: border-color 0.25s;
+  }
+  .benefit-card:hover { border-color: rgba(200,169,110,0.4); }
+  .benefit-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem; font-weight: 900;
+    color: var(--accent); opacity: 0.4; margin-bottom: 1rem;
+  }
+  .benefit-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .benefit-desc { font-size: 0.83rem; line-height: 1.7; color: rgba(196,218,240,0.6); }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: var(--navy);
+    text-align: center; padding: 8rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 800px; height: 400px; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(26,75,140,0.3) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .cta-section .section-title { max-width: 600px; margin: 0 auto 1.5rem; }
+  .cta-section .section-desc { max-width: 500px; margin: 0 auto 3rem; }
+  .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--blue-dark);
+    border-top: 1px solid var(--border);
+    padding: 3rem 4rem;
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: center; gap: 2rem;
+  }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 900; color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+  .footer-logo span { color: var(--accent); }
+  .footer-desc { font-size: 0.8rem; color: var(--muted); }
+  .footer-right { text-align: right; }
+  .footer-tagline {
+    font-size: 0.78rem; letter-spacing: 0.12em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  /* ── SCROLL REVEALS ── */
+  .reveal {
+    opacity: 0; transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 8rem 1.5rem 4rem; }
+    section { padding: 5rem 1.5rem; }
+    .stats-strip { grid-template-columns: repeat(2,1fr); gap: 1.5rem; padding: 2rem 1.5rem; }
+    .stat-item { border-right: none; }
+    .mission-section, .scope-section { grid-template-columns: 1fr; gap: 2rem; }
+    .values-grid, .benefits-grid { grid-template-columns: 1fr; }
+    .models-grid { grid-template-columns: 1fr; }
+    .timeline { grid-template-columns: 1fr; }
+    footer { grid-template-columns: 1fr; }
+    .footer-right { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">ARCC<span>-Net</span></div>
+  <ul class="nav-links">
+    <li><a href="#mision">Misión</a></li>
+    <li><a href="#valores">Valores</a></li>
+    <li><a href="#objetivos">Objetivos</a></li>
+    <li><a href="#modelos">Modelos</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="#contacto" class="nav-cta">Sumarse</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-glow"></div>
+  <div class="hero-left">
+    <div class="hero-tag">Red Argentina de Investigación en Cuidados Críticos</div>
+    <h1 class="hero-h1">Ciencia<br>colaborativa<br><em>que salva vidas</em></h1>
+    <p class="hero-sub">ARCC-Net es la plataforma nacional para investigación multicéntrica rigurosa en cuidados críticos, conectando hospitales, disciplinas y regiones de Argentina.</p>
+    <div class="hero-actions">
+      <a href="#mision" class="btn-primary">Conocer la red</a>
+      <a href="#objetivos" class="btn-outline">Ver objetivos →</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-visual">
+      <div class="hero-ring ring-1"><div class="ring-dot"></div></div>
+      <div class="hero-ring ring-2"><div class="ring-dot ring-dot-blue"></div></div>
+      <div class="hero-ring ring-3"></div>
+      <div class="hero-center-text">
+        <div class="big-num">8–12</div>
+        <div class="big-label">Centros iniciales</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat-item reveal">
+    <div class="stat-num">8–12</div>
+    <div class="stat-label">Centros fundadores</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-num">0–2</div>
+    <div class="stat-label">Años para masa crítica</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-num">FAIR</div>
+    <div class="stat-label">Datos abiertos e interoperables</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">Federal e interprofesional</div>
+  </div>
+</div>
+
+<!-- MISSION & VISION -->
+<section class="mission-section" id="mision">
+  <div>
+    <div class="section-tag">Propósito</div>
+    <h2 class="section-title reveal">Por qué una red nacional ahora</h2>
+    <p class="section-desc reveal">Argentina cuenta con profesionales de alta complejidad y experiencia multicéntrica. ARCC-Net ordena, fortalece y potencia esa capacidad hacia estándares internacionales.</p>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:1.5rem;">
+    <div class="mission-card reveal">
+      <div class="card-label">Misión</div>
+      <div class="card-title">Evidencia robusta para el paciente crítico</div>
+      <p class="card-text">Generar y difundir evidencia derivada de estudios multicéntricos que mejore los resultados de los pacientes en cuidados críticos y sus familias, mediante investigación colaborativa, transparente y metodológicamente rigurosa.</p>
+    </div>
+    <div class="mission-card vision reveal">
+      <div class="card-label">Visión</div>
+      <div class="card-title">Red líder en Argentina</div>
+      <p class="card-text">Ser referente nacional en cuidados críticos, reconocida por calidad metodológica, colaboración federal, innovación y capacidad de respuesta ante emergencias sanitarias.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values-section" id="valores">
+  <div class="section-tag">Cultura de trabajo</div>
+  <h2 class="section-title reveal">Valores que definen<br>el modo de trabajar</h2>
+  <div class="values-grid">
+    <div class="value-card reveal">
+      <div class="value-icon">🔬</div>
+      <div class="value-name">Integridad científica</div>
+      <p class="value-desc">Rigor metodológico y transparencia en cada etapa del proceso de investigación.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">🤝</div>
+      <div class="value-name">Colaboración federal</div>
+      <p class="value-desc">Cooperación multicéntrica e interprofesional que integra regiones y niveles de complejidad.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">⚖️</div>
+      <div class="value-name">Equidad e inclusión</div>
+      <p class="value-desc">Oportunidades reales para centros emergentes y profesiones diversas en toda Argentina.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">💊</div>
+      <div class="value-name">Impacto clínico</div>
+      <p class="value-desc">Preguntas relevantes para la realidad epidemiológica y el sistema de salud argentino.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">📂</div>
+      <div class="value-name">Ciencia abierta</div>
+      <p class="value-desc">Datos FAIR, protocolos y acceso abierto siempre que sea posible.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="value-icon">🎓</div>
+      <div class="value-name">Formación continua</div>
+      <p class="value-desc">Mentoría, talleres y desarrollo académico para investigadores de todas las etapas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline-section" id="objetivos">
+  <div class="section-tag">Horizontes temporales</div>
+  <h2 class="section-title reveal">Crecimiento gradual,<br>medible y sostenible</h2>
+  <p class="section-desc reveal">Tres etapas con metas concretas para consolidar ARCC-Net como plataforma nacional de referencia.</p>
+  <div class="timeline">
+    <div class="tl-block reveal">
+      <div class="tl-period">0–2</div>
+      <div class="tl-label">Años · Fundación</div>
+      <ul class="tl-items">
+        <li>Constituir 8–12 centros fundadores</li>
+        <li>Establecer gobernanza y reglas de autoría</li>
+        <li>Lanzar estudios observacionales piloto</li>
+        <li>Implementar REDCap y primeros protocolos</li>
+      </ul>
+    </div>
+    <div class="tl-block reveal">
+      <div class="tl-period">3–5</div>
+      <div class="tl-label">Años · Expansión</div>
+      <ul class="tl-items">
+        <li>Ensayos pragmáticos nacionales</li>
+        <li>Plataforma de datos federada</li>
+        <li>Evidencia de alto impacto publicada</li>
+        <li>Acuerdos con redes internacionales</li>
+      </ul>
+    </div>
+    <div class="tl-block reveal">
+      <div class="tl-period">5–10</div>
+      <div class="tl-label">Años · Consolidación</div>
+      <ul class="tl-items">
+        <li>Registro nacional de cuidados críticos</li>
+        <li>Centro nacional de coordinación de datos</li>
+        <li>Financiamiento sostenible asegurado</li>
+        <li>Referente reconocido internacionalmente</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SCOPE -->
+<section class="scope-section">
+  <div>
+    <div class="section-tag">Ámbito de acción</div>
+    <h2 class="section-title reveal">Una red amplia para preguntas clínicas relevantes</h2>
+    <ul class="scope-list">
+      <li class="reveal">Adultos, pediátricos y neonatales según definición del grupo.</li>
+      <li class="reveal">Intervenciones farmacológicas, ventilatorias, hemodinámicas y de rehabilitación.</li>
+      <li class="reveal">Sedación, nutrición, sepsis, SDRA, daño orgánico agudo y neurocríticos.</li>
+      <li class="reveal">Colaboraciones con sociedades científicas, universidades y hospitales públicos/privados.</li>
+      <li class="reveal">Estudios nacionales y sitio argentino en colaboraciones globales.</li>
+    </ul>
+  </div>
+  <div class="reveal">
+    <div class="scope-flow">
+      <div class="section-tag" style="justify-content:center;">Flujo de trabajo</div>
+      <div class="flow-steps">
+        <div class="flow-step">🩺 Pregunta clínica</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">📋 Protocolo multicéntrico</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">🔎 Evidencia robusta</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">💙 Mejora asistencial</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODELS -->
+<section class="models-section" id="modelos">
+  <div class="section-tag">Inspiración</div>
+  <h2 class="section-title reveal">Aprender de redes consolidadas</h2>
+  <p class="section-desc reveal">Modelos internacionales que demuestran el valor de la colaboración estructurada en cuidados críticos.</p>
+  <div class="models-grid">
+    <div class="model-card reveal">
+      <div class="model-flag">🇧🇷</div>
+      <div>
+        <div class="model-name">BRICNet</div>
+        <div class="model-country">Brasil</div>
+        <p class="model-desc">Estudios colaborativos relevantes para terapia intensiva y contexto local latinoamericano.</p>
+      </div>
+    </div>
+    <div class="model-card reveal">
+      <div class="model-flag">🇦🇺</div>
+      <div>
+        <div class="model-name">ANZICS-CTG</div>
+        <div class="model-country">Australia / Nueva Zelanda</div>
+        <p class="model-desc">Red de ensayos multicéntricos con fuerte soporte metodológico y formación de investigadores.</p>
+      </div>
+    </div>
+    <div class="model-card reveal">
+      <div class="model-flag">🇫🇷</div>
+      <div>
+        <div class="model-name">REVA</div>
+        <div class="model-country">Francia</div>
+        <p class="model-desc">Investigación clínica en insuficiencia respiratoria aguda y ventilación artificial de alta calidad.</p>
+      </div>
+    </div>
+    <div class="model-card reveal">
+      <div class="model-flag">🌐</div>
+      <div>
+        <div class="model-name">Red de Redes</div>
+        <div class="model-country">Colaboración internacional</div>
+        <p class="model-desc">Articulación entre redes para escalar preguntas, datos y evidencia a nivel global.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="benefits-section">
+  <div class="section-tag">Qué aporta conformar ARCC-Net</div>
+  <h2 class="section-title reveal">Beneficios concretos<br>de las Clinical Trial Networks</h2>
+  <div class="benefits-grid">
+    <div class="benefit-card reveal">
+      <div class="benefit-num">01</div>
+      <div class="benefit-title">Mayor capacidad multicéntrica</div>
+      <p class="benefit-desc">Ensayos multicéntricos y registros nacionales con poder estadístico suficiente.</p>
+    </div>
+    <div class="benefit-card reveal">
+      <div class="benefit-num">02</div>
+      <div class="benefit-title">Estandarización y monitoreo</div>
+      <p class="benefit-desc">Procedimientos, datos y sistemas de monitoreo unificados en todos los centros.</p>
+    </div>
+    <div class="benefit-card reveal">
+      <div class="benefit-num">03</div>
+      <div class="benefit-title">Mejor reclutamiento</div>
+      <p class="benefit-desc">Mayor velocidad y retención de pacientes gracias a la red colaborativa.</p>
+    </div>
+    <div class="benefit-card reveal">
+      <div class="benefit-num">04</div>
+      <div class="benefit-title">Soporte regulatorio y ético</div>
+      <p class="benefit-desc">Cumplimiento normativo y acompañamiento metodológico en cada estudio.</p>
+    </div>
+    <div class="benefit-card reveal">
+      <div class="benefit-num">05</div>
+      <div class="benefit-title">Formación de investigadores</div>
+      <p class="benefit-desc">Desarrollo continuo de jóvenes investigadores de todas las profesiones de salud.</p>
+    </div>
+    <div class="benefit-card reveal">
+      <div class="benefit-num">06</div>
+      <div class="benefit-title">Respuesta a emergencias</div>
+      <p class="benefit-desc">Capacidad para generar evidencia rápida ante emergencias sanitarias nacionales.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contacto">
+  <div class="section-tag" style="justify-content:center;">Únase a la red</div>
+  <h2 class="section-title reveal">Transformar investigación<br>en cuidado</h2>
+  <p class="section-desc reveal">La red aspira a facilitar, ordenar y potenciar la investigación clínica multicéntrica en cuidados críticos en Argentina, con estándares internacionales.</p>
+  <div class="cta-buttons reveal">
+    <a href="mailto:contacto@arcc-net.org.ar" class="btn-primary">Contactar la red</a>
+    <a href="#" class="btn-outline">Descargar presentación</a>
+  </div>
+  <div style="margin-top:4rem; display:flex; gap:3rem; justify-content:center; flex-wrap:wrap; opacity:0.55;">
+    <span style="font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase;">Colaboración</span>
+    <span style="font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent);">·</span>
+    <span style="font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase;">Rigor</span>
+    <span style="font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent);">·</span>
+    <span style="font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase;">Transparencia</span>
+    <span style="font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent);">·</span>
+    <span style="font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase;">Impacto</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">ARCC<span>-Net</span></div>
+    <div class="footer-desc">Red Argentina de Investigación Colaborativa en Cuidados Críticos<br>Argentinian Research in Critical Care Network</div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-tagline">Ciencia rigurosa · Federal · Inclusiva</div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        entry.target.style.transitionDelay = `${(Array.from(entry.target.parentNode.children).indexOf(entry.target) % 4) * 80}ms`;
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
